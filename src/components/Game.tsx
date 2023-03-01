@@ -2,9 +2,10 @@ import { View, Text, SafeAreaView, StyleSheet } from 'react-native'
 import { useEffect, useState } from "react";
 import Header from './Header'
 import Score from './Score';
-import { Coordinate, Direction } from '../types/types';
+import { Coordinate, Direction, GestureEventType } from '../types/types';
 import { Colors } from '../styles/colors';
 import Snake from './Snake';
+import { PanGestureHandler } from 'react-native-gesture-handler';
 
 const SNAKE_INITIAL_POSITION = [{x:5, y:5}];
 const FOOD_INITIAL_POSITION = [{x:5, y:20}];
@@ -35,10 +36,36 @@ export default function Game(): JSX.Element {
     const newHead = { ...snakeHead }
   }
 
-    const reloadGame = () => {}
-    const pauseGame = () => {}
+    const reloadGame = () => {
+        setSnake(SNAKE_INITIAL_POSITION)
+        setFood(FOOD_INITIAL_POSITION)
+        setIsGameOver(false)
+        setScore(0)
+        setDirection(Direction.Right)
+        setIsPaused(false)
+    }
+    const pauseGame = () => {
+
+    }
+    const handleGesture = (event: GestureEventType) => {
+        const {translationX, translationY} = event.nativeEvent;
+        if(Math.abs(translationX) > Math.abs(translationY)){
+            if(translationX > 0){
+                setDirection(Direction.Right)
+            } else{
+                setDirection(Direction.Left)
+            }
+        }else{
+            if(translationY > 0){
+                setDirection(Direction.Down);
+            }else{
+                setDirection(Direction.Up);
+            }
+        }
+    }
   return (
-    <SafeAreaView>
+    <PanGestureHandler onGestureEvent={handleGesture}>
+      <SafeAreaView style={styles.container}>
         <Header
           reloadGame={reloadGame}
           pauseGame={pauseGame}
@@ -47,9 +74,11 @@ export default function Game(): JSX.Element {
           <Score score={score} />
         </Header>
         <View style={styles.boundaries}>
-            <Snake snake={snake} />
+          <Snake snake={snake} />
+          {/* food */}
         </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </PanGestureHandler>
   )
 }
 
